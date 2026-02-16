@@ -13,9 +13,9 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!user?.token) return;
             try {
-                const token = localStorage.getItem('token');
-                const config = { headers: { 'x-auth-token': token } };
+                const config = { headers: { Authorization: `Bearer ${user.token}` } };
 
                 const [workoutsRes, nutritionRes, progressRes] = await Promise.all([
                     axios.get('http://localhost:5000/api/workouts', config),

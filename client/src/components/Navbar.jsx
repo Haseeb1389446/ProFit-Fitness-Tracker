@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Activity, User } from 'lucide-react';
+import { Menu, X, LogOut, Activity, User, UserCircle, Dumbbell, Utensils, TrendingUp } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -13,7 +13,10 @@ const Navbar = () => {
 
     const navItems = [
         { path: '/', label: 'Dashboard', icon: Activity },
-        { path: '/add-workout', label: 'Log Workout', icon: User }, // Using User icon as placeholder for log
+        { path: '/add-workout', label: 'Workouts', icon: Dumbbell },
+        { path: '/nutrition', label: 'Nutrition', icon: Utensils },
+        { path: '/progress', label: 'Progress', icon: TrendingUp },
+        { path: '/profile', label: 'Profile', icon: UserCircle },
     ];
 
     return (
@@ -22,13 +25,14 @@ const Navbar = () => {
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
                         <Link to="/" className="text-2xl font-bold text-white flex items-center gap-2">
-                            <Activity className="text-red-600" /> ProFit
+                            <Activity className="text-red-600" size={28} />
+                            <span className="tracking-tight">Pro<span className="text-red-600">Fit</span></span>
                         </Link>
                     </div>
 
                     {/* Desktop Menu */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
+                    <div className="hidden md:flex items-center gap-6">
+                        <div className="flex items-baseline space-x-2">
                             {navItems.map((item) => {
                                 const Icon = item.icon;
                                 const isActive = location.pathname === item.path;
@@ -36,22 +40,35 @@ const Navbar = () => {
                                     <Link
                                         key={item.path}
                                         to={item.path}
-                                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${isActive
-                                            ? 'bg-red-600 text-white'
-                                            : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isActive
+                                            ? 'bg-red-600/10 text-red-500 border border-red-600/20'
+                                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
                                             }`}
                                     >
-                                        <Icon size={16} />
+                                        <Icon size={18} />
                                         {item.label}
                                     </Link>
                                 );
                             })}
+                        </div>
+
+                        <div className="flex items-center gap-4 pl-4 border-l border-gray-800">
+                            <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                                <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 overflow-hidden flex items-center justify-center">
+                                    {user.profilePicture ? (
+                                        <img src={user.profilePicture} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={16} className="text-gray-400" />
+                                    )}
+                                </div>
+                                <span className="text-sm font-medium text-gray-300 hidden lg:block">{user.name}</span>
+                            </Link>
                             <button
                                 onClick={logout}
-                                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-gray-800 transition-all"
+                                className="p-2 rounded-full text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                title="Logout"
                             >
-                                <LogOut size={16} />
-                                Logout
+                                <LogOut size={20} />
                             </button>
                         </div>
                     </div>
@@ -83,17 +100,35 @@ const Navbar = () => {
                                     key={item.path}
                                     to={item.path}
                                     onClick={() => setIsOpen(false)}
-                                    className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === item.path ? 'bg-red-600 text-white' : 'text-gray-300 hover:text-white hover:bg-gray-800'}`}
+                                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium ${location.pathname === item.path ? 'bg-red-600 text-white' : 'text-gray-300 hover:text-white hover:bg-gray-800'}`}
                                 >
+                                    <item.icon size={20} />
                                     {item.label}
                                 </Link>
                             ))}
-                            <button
-                                onClick={logout}
-                                className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-red-400 hover:bg-gray-800"
-                            >
-                                Logout
-                            </button>
+
+                            <div className="pt-4 mt-4 border-t border-gray-800">
+                                <div className="flex items-center px-3 py-2 gap-3 mb-2">
+                                    <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 overflow-hidden flex items-center justify-center">
+                                        {user.profilePicture ? (
+                                            <img src={user.profilePicture} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <User size={20} className="text-gray-400" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-medium">{user.name}</div>
+                                        <div className="text-gray-500 text-sm">{user.email}</div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={logout}
+                                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium text-red-400 hover:bg-red-500/10 transition-all"
+                                >
+                                    <LogOut size={20} />
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 )}

@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, Save, Dumbbell } from 'lucide-react';
+import AuthContext from '../context/AuthContext';
 
 const AddWorkout = () => {
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
+    const [msg, setMsg] = useState('');
     const [formData, setFormData] = useState({
         activity: '', // Workout Name e.g., "Leg Day"
         duration: '',
@@ -41,14 +44,26 @@ const AddWorkout = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/workouts', formData, {
+            const payload = {
+                ...formData,
+                duration: Number(formData.duration) || 0,
+                exercises: formData.exercises.map(ex => ({
+                    ...ex,
+                    sets: Number(ex.sets) || 1,
+                    reps: Number(ex.reps) || 0,
+                    weight: Number(ex.weight) || 0
+                }))
+            };
+
+            await axios.post('http://localhost:5000/api/workouts', payload, {
                 headers: {
-                    'x-auth-token': localStorage.getItem('token')
+                    Authorization: `Bearer ${user?.token}`
                 }
             });
             navigate('/dashboard');
         } catch (err) {
-            console.error(err);
+            console.error('Error logging workout:', err.response?.data || err.message);
+            setMsg('Error logging workout. Please try again.');
         }
     };
 
@@ -165,6 +180,7 @@ const AddWorkout = () => {
                     ></textarea>
                 </div>
 
+                {msg && <p className="text-red-500 text-center mb-4">{msg}</p>}
                 <button type="submit" className="w-full btn-primary p-3 rounded font-bold text-lg flex justify-center items-center gap-2 mt-4">
                     <Save size={20} /> Save Workout
                 </button>

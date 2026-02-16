@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Plus, Trash2, Activity } from 'lucide-react';
+import AuthContext from '../context/AuthContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Progress = () => {
+    const { user } = useContext(AuthContext);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [msg, setMsg] = useState('');
     const [formData, setFormData] = useState({
         weight: '',
         chest: '',
@@ -23,7 +26,7 @@ const Progress = () => {
         try {
             const res = await axios.get('http://localhost:5000/api/progress', {
                 headers: {
-                    'x-auth-token': localStorage.getItem('token')
+                    Authorization: `Bearer ${user?.token}`
                 }
             });
             setLogs(res.data);
@@ -34,29 +37,43 @@ const Progress = () => {
         }
     };
 
+    const [selectedFiles, setSelectedFiles] = useState([]);
+
+    const handleFileChange = (e) => {
+        setSelectedFiles(Array.from(e.target.files));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = {
-                weight: formData.weight,
-                measurements: {
-                    chest: formData.chest,
-                    waist: formData.waist,
-                    hips: formData.hips
-                },
-                notes: formData.notes
-            };
+            const submitData = new FormData();
+            submitData.append('weight', formData.weight);
+            submitData.append('measurements', JSON.stringify({
+                chest: Number(formData.chest) || 0,
+                waist: Number(formData.waist) || 0,
+                hips: Number(formData.hips) || 0
+            }));
+            submitData.append('notes', formData.notes);
 
-            await axios.post('http://localhost:5000/api/progress', payload, {
+            selectedFiles.forEach(file => {
+                submitData.append('photos', file);
+            });
+
+            await axios.post('http://localhost:5000/api/progress', submitData, {
                 headers: {
-                    'x-auth-token': localStorage.getItem('token')
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${user?.token}`
                 }
             });
             setShowAddForm(false);
             setFormData({ weight: '', chest: '', waist: '', hips: '', notes: '' });
+            setSelectedFiles([]);
             fetchLogs();
+            setMsg('Progress logged successfully!');
+            setTimeout(() => setMsg(''), 3000);
         } catch (err) {
-            console.error(err);
+            console.error('Error logging progress:', err.response?.data || err.message);
+            setMsg('Error logging progress. Please try again.');
         }
     };
 
@@ -103,6 +120,11 @@ const Progress = () => {
                                 </div>
                             </div>
                             <div className="mb-4">
+                                <label className="block text-gray-400 mb-1 text-sm font-medium">Photos</label>
+                                <input type="file" multiple accept="image/*" onChange={handleFileChange} className="w-full input-field p-2 rounded" />
+                                <div className="text-gray-500 text-xs mt-1">Upload progress photos (Max 5)</div>
+                            </div>
+                            <div className="mb-4">
                                 <label className="block text-gray-400 mb-1 text-sm font-medium">Notes</label>
                                 <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="w-full input-field p-2 rounded" rows="2"></textarea>
                             </div>
@@ -110,17 +132,29 @@ const Progress = () => {
                         </form>
                     )}
 
+                    {msg && <p className={`mb-6 text-center p-3 rounded bg-theme-dark border ${msg.includes('Error') ? 'text-red-500 border-red-500/20' : 'text-green-500 border-green-500/20'}`}>{msg}</p>}
+
                     <div className="space-y-4">
                         {loading ? <p className="text-gray-400">Loading...</p> : logs.map(log => (
-                            <div key={log._id} className="bg-theme-dark p-4 rounded-lg flex justify-between items-center">
-                                <div>
-                                    <div className="text-gray-400 text-sm mb-1">{new Date(log.date).toLocaleDateString()}</div>
+                            <div key={log._id} className="bg-theme-dark p-4 rounded-lg">
+                                <div className="flex justify-between items-center mb-2">
+                                    <div className="text-gray-400 text-sm">{new Date(log.date).toLocaleDateString()}</div>
                                     <div className="text-xl text-white font-bold">{log.weight} <span className="text-sm text-gray-400 font-normal">weight</span></div>
-                                    <div className="text-sm text-gray-400 mt-1">
-                                        {log.measurements?.chest && <span className="mr-3">Chest: {log.measurements.chest}</span>}
-                                        {log.measurements?.waist && <span className="mr-3">Waist: {log.measurements.waist}</span>}
-                                    </div>
                                 </div>
+                                <div className="text-sm text-gray-400 mb-2">
+                                    {log.measurements?.chest && <span className="mr-3">Chest: {log.measurements.chest}</span>}
+                                    {log.measurements?.waist && <span className="mr-3">Waist: {log.measurements.waist}</span>}
+                                    {log.measurements?.hips && <span className="mr-3">Hips: {log.measurements.hips}</span>}
+                                </div>
+                                {log.notes && <div className="text-gray-300 text-sm mb-3 italic">"{log.notes}"</div>}
+
+                                {log.photos && log.photos.length > 0 && (
+                                    <div className="flex gap-2 overflow-x-auto pb-2">
+                                        {log.photos.map((photo, index) => (
+                                            <img key={index} src={photo} alt={`Progress ${index + 1}`} className="w-24 h-24 object-cover rounded border border-gray-700 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => window.open(photo, '_blank')} />
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

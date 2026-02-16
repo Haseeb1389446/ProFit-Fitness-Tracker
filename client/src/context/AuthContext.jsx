@@ -8,11 +8,25 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        if (userInfo) {
-            setUser(userInfo);
-        }
-        setLoading(false);
+        const fetchProfile = async () => {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (userInfo && userInfo.token) {
+                try {
+                    const { data } = await axios.get('http://localhost:5000/api/auth/profile', {
+                        headers: { Authorization: `Bearer ${userInfo.token}` }
+                    });
+                    // Merge token back in because backend profile doesn't include it
+                    const fullUser = { ...data, token: userInfo.token };
+                    localStorage.setItem('userInfo', JSON.stringify(fullUser));
+                    setUser(fullUser);
+                } catch (error) {
+                    console.error('Failed to fetch profile', error);
+                    setUser(userInfo); // Fallback to local
+                }
+            }
+            setLoading(false);
+        };
+        fetchProfile();
     }, []);
 
     const login = async (email, password) => {
@@ -42,8 +56,14 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const updateUser = (updatedData) => {
+        const newUser = { ...user, ...updatedData };
+        localStorage.setItem('userInfo', JSON.stringify(newUser));
+        setUser(newUser);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, updateUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

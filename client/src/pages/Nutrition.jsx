@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Plus, Trash2, Utensils } from 'lucide-react';
+import AuthContext from '../context/AuthContext';
 
 const Nutrition = () => {
+    const { user } = useContext(AuthContext);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
@@ -10,6 +12,7 @@ const Nutrition = () => {
         mealType: 'Breakfast',
         foodItems: [{ name: '', quantity: '', calories: '', protein: '', carbs: '', fat: '' }]
     });
+    const [msg, setMsg] = useState('');
 
     useEffect(() => {
         fetchLogs();
@@ -19,7 +22,7 @@ const Nutrition = () => {
         try {
             const res = await axios.get('http://localhost:5000/api/nutrition', {
                 headers: {
-                    'x-auth-token': localStorage.getItem('token')
+                    Authorization: `Bearer ${user?.token}`
                 }
             });
             setLogs(res.data);
@@ -47,19 +50,36 @@ const Nutrition = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/nutrition', formData, {
+            const payload = {
+                mealType: formData.mealType,
+                date: new Date().toISOString(), // Ensure date is sent
+                foodItems: formData.foodItems.map(item => ({
+                    ...item,
+                    calories: Number(item.calories) || 0,
+                    protein: Number(item.protein) || 0,
+                    carbs: Number(item.carbs) || 0,
+                    fat: Number(item.fat) || 0
+                }))
+            };
+
+            await axios.post('http://localhost:5000/api/nutrition', payload, {
                 headers: {
-                    'x-auth-token': localStorage.getItem('token')
+                    Authorization: `Bearer ${user?.token}`
                 }
             });
+            console.log('Meal logged successfully');
             setShowAddForm(false);
             setFormData({
                 mealType: 'Breakfast',
                 foodItems: [{ name: '', quantity: '', calories: '', protein: '', carbs: '', fat: '' }]
             });
             fetchLogs();
+            setMsg('Meal logged successfully!');
+            setTimeout(() => setMsg(''), 3000);
         } catch (err) {
-            console.error(err);
+            const errorMsg = err.response?.data?.message || err.response?.data || err.message;
+            console.error('Error logging meal:', errorMsg);
+            setMsg(`Error: ${errorMsg}`);
         }
     };
 
@@ -67,7 +87,7 @@ const Nutrition = () => {
         try {
             await axios.delete(`http://localhost:5000/api/nutrition/${id}`, {
                 headers: {
-                    'x-auth-token': localStorage.getItem('token')
+                    Authorization: `Bearer ${user?.token}`
                 }
             });
             fetchLogs();
@@ -123,6 +143,8 @@ const Nutrition = () => {
                     <button type="submit" className="w-full btn-primary p-2 rounded font-semibold">Save Meal</button>
                 </form>
             )}
+
+            {msg && <p className={`mb-6 text-center p-3 rounded bg-theme-dark border ${msg.includes('Error') ? 'text-red-500 border-red-500/20' : 'text-green-500 border-green-500/20'}`}>{msg}</p>}
 
             <div className="grid gap-4">
                 {loading ? <p className="text-gray-400">Loading...</p> : logs.map(log => (

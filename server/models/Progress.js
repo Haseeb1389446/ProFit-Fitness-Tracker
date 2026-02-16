@@ -22,6 +22,9 @@ const progressSchema = new mongoose.Schema({
         biceps: Number,
         thighs: Number
     },
+    photos: [{
+        type: String // URL to the photo
+    }],
     notes: String
 }, { timestamps: true });
 

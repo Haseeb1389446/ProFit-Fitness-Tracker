@@ -49,11 +49,10 @@ const nutritionSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Pre-save hook to calculate total calories if not provided
-nutritionSchema.pre('save', function (next) {
+nutritionSchema.pre('save', async function () {
     if (this.foodItems && this.foodItems.length > 0) {
         this.totalCalories = this.foodItems.reduce((total, item) => total + (item.calories || 0), 0);
     }
-    next();
 });
 
 module.exports = mongoose.model('Nutrition', nutritionSchema);
