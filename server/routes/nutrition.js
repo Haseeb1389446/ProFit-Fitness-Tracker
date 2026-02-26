@@ -3,10 +3,26 @@ const router = express.Router();
 const Nutrition = require('../models/Nutrition');
 const { protect } = require('../middleware/authMiddleware');
 
-// Get all nutrition logs for the user
+// Get all nutrition logs for the user with search and filter
 router.get('/', protect, async (req, res) => {
     try {
-        const logs = await Nutrition.find({ user: req.user.id }).sort({ date: -1 });
+        const { search, startDate, endDate } = req.query;
+        let query = { user: req.user.id };
+
+        if (search) {
+            query.$or = [
+                { mealType: { $regex: search, $options: 'i' } },
+                { 'foodItems.name': { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        if (startDate || endDate) {
+            query.date = {};
+            if (startDate) query.date.$gte = new Date(startDate);
+            if (endDate) query.date.$lte = new Date(endDate);
+        }
+
+        const logs = await Nutrition.find(query).sort({ date: -1 });
         res.json(logs);
     } catch (err) {
         console.error(err.message);

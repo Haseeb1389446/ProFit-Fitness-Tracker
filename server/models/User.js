@@ -31,14 +31,23 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    preferences: {
+    settings: {
         theme: {
             type: String,
-            default: 'light'
+            default: 'dark'
         },
         unitSystem: {
             type: String, // 'metric' or 'imperial'
             default: 'metric'
+        },
+        notifications: {
+            type: Boolean,
+            default: true
+        },
+        privacy: {
+            type: String,
+            enum: ['public', 'private', 'friends'],
+            default: 'private'
         }
     }
 }, { timestamps: true });

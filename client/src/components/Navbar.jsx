@@ -2,7 +2,8 @@ import { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Activity, User, UserCircle, Dumbbell, Utensils, TrendingUp } from 'lucide-react';
+import { Menu, X, LogOut, Activity, User, UserCircle, Dumbbell, Utensils, TrendingUp, FileText } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -13,9 +14,10 @@ const Navbar = () => {
 
     const navItems = [
         { path: '/', label: 'Dashboard', icon: Activity },
-        { path: '/add-workout', label: 'Workouts', icon: Dumbbell },
+        { path: '/add-workout', label: 'Add Workout', icon: Dumbbell },
         { path: '/nutrition', label: 'Nutrition', icon: Utensils },
         { path: '/progress', label: 'Progress', icon: TrendingUp },
+        { path: '/reports', label: 'Reports', icon: FileText },
         { path: '/profile', label: 'Profile', icon: UserCircle },
     ];
 
@@ -53,6 +55,7 @@ const Navbar = () => {
                         </div>
 
                         <div className="flex items-center gap-4 pl-4 border-l border-gray-800">
+                            <NotificationCenter />
                             <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                                 <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 overflow-hidden flex items-center justify-center">
                                     {user.profilePicture ? (
@@ -74,7 +77,8 @@ const Navbar = () => {
                     </div>
 
                     {/* Mobile menu button */}
-                    <div className="md:hidden">
+                    <div className="md:hidden flex items-center gap-4">
+                        <NotificationCenter />
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none"

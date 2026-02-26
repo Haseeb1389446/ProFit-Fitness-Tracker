@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import { User, Settings, Camera, Save } from 'lucide-react';
+import { User, Settings, Camera, Save, LifeBuoy } from 'lucide-react';
 import axios from 'axios';
 
 const Profile = () => {
@@ -139,7 +140,18 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {msg && <div className={`p-3 rounded mb-4 text-center ${msg.includes('success') ? 'bg-green-900/30 text-green-200 border border-green-800' : 'bg-red-900/30 text-red-200 border border-red-800'}`}>{msg}</div>}
+                {msg && <div className={`p-3 rounded mb-4 text-center ${msg.includes('success') ? 'bg-gray-800 text-white border border-gray-700' : 'bg-red-900/30 text-red-200 border border-red-800'}`}>{msg}</div>}
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <Link to="/settings" className="bg-gray-800 p-4 rounded-lg flex flex-col items-center justify-center hover:bg-gray-700 transition-colors border border-gray-700 group">
+                        <Settings className="w-8 h-8 text-gray-300 mb-2 group-hover:rotate-45 transition-transform" />
+                        <span className="text-gray-300 font-semibold">Settings</span>
+                    </Link>
+                    <Link to="/support" className="bg-gray-800 p-4 rounded-lg flex flex-col items-center justify-center hover:bg-gray-700 transition-colors border border-gray-700 group">
+                        <LifeBuoy className="w-8 h-8 text-gray-300 mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-gray-300 font-semibold">Support</span>
+                    </Link>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -163,25 +175,7 @@ const Profile = () => {
                         <textarea name="bio" value={formData.bio} onChange={handleChange} className="w-full input-field p-2 rounded" rows="3" placeholder="Tell us about yourself..."></textarea>
                     </div>
 
-                    <div className="border-t border-gray-800 pt-4 mt-4">
-                        <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2"><Settings className="w-5 h-5 text-gray-400" /> Preferences</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-gray-400 text-sm mb-1">Theme</label>
-                                <select name="theme" value={formData.theme} onChange={handleChange} className="w-full input-field p-2 rounded">
-                                    <option value="light">Light</option>
-                                    <option value="dark">Dark</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-gray-400 text-sm mb-1">Units</label>
-                                <select name="unitSystem" value={formData.unitSystem} onChange={handleChange} className="w-full input-field p-2 rounded">
-                                    <option value="metric">Metric (kg/cm)</option>
-                                    <option value="imperial">Imperial (lbs/in)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Preferences Moved to Settings Page */}
 
                     <div className="border-t border-gray-800 pt-4 mt-4">
                         <h3 className="text-lg font-semibold text-white mb-3">Change Password</h3>

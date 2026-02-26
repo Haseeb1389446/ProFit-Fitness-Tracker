@@ -35,6 +35,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/workouts', require('./routes/workouts'));
 app.use('/api/nutrition', require('./routes/nutrition'));
 app.use('/api/progress', require('./routes/progress'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/support', require('./routes/support'));
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

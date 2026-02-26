@@ -10,6 +10,9 @@ import AddWorkout from './pages/AddWorkout';
 import Nutrition from './pages/Nutrition';
 import Progress from './pages/Progress';
 import Profile from './pages/Profile';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Support from './pages/Support';
 import Navbar from './components/Navbar';
 
 // Protected Route Component
@@ -50,6 +53,9 @@ function App() {
             <Route path="/nutrition" element={<PrivateRoute><Nutrition /></PrivateRoute>} />
             <Route path="/progress" element={<PrivateRoute><Progress /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
+            <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+            <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
             <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
           </Routes>
         </div>

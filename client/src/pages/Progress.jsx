@@ -132,7 +132,7 @@ const Progress = () => {
                         </form>
                     )}
 
-                    {msg && <p className={`mb-6 text-center p-3 rounded bg-theme-dark border ${msg.includes('Error') ? 'text-red-500 border-red-500/20' : 'text-green-500 border-green-500/20'}`}>{msg}</p>}
+                    {msg && <p className={`mb-6 text-center p-3 rounded bg-theme-dark border ${msg.includes('Error') ? 'text-red-500 border-red-500/20' : 'text-white border-gray-500/20'}`}>{msg}</p>}
 
                     <div className="space-y-4">
                         {loading ? <p className="text-gray-400">Loading...</p> : logs.map(log => (

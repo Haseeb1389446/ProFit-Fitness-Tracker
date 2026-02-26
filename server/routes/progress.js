@@ -6,7 +6,16 @@ const { protect } = require('../middleware/authMiddleware');
 // Get all progress logs
 router.get('/', protect, async (req, res) => {
     try {
-        const logs = await Progress.find({ user: req.user.id }).sort({ date: -1 });
+        const { startDate, endDate } = req.query;
+        let query = { user: req.user.id };
+
+        if (startDate || endDate) {
+            query.date = {};
+            if (startDate) query.date.$gte = new Date(startDate);
+            if (endDate) query.date.$lte = new Date(endDate);
+        }
+
+        const logs = await Progress.find(query).sort({ date: -1 });
         res.json(logs);
     } catch (err) {
         console.error(err.message);
