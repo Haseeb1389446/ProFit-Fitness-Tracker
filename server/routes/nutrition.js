@@ -43,6 +43,15 @@ router.post('/', protect, async (req, res) => {
         });
 
         const log = await newLog.save();
+
+        // Create a notification for the nutrition log
+        const Notification = require('../models/Notification');
+        await Notification.create({
+            user: req.user.id,
+            type: 'system',
+            message: `You successfully logged your meals for ${mealType}.`
+        });
+
         res.json(log);
     } catch (err) {
         console.error(err.message);

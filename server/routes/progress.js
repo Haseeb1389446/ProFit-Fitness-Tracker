@@ -56,6 +56,15 @@ router.post('/', protect, upload.array('photos', 5), async (req, res) => {
         });
 
         const log = await newLog.save();
+
+        // Create a notification for the progress update
+        const Notification = require('../models/Notification');
+        await Notification.create({
+            user: req.user.id,
+            type: 'goal',
+            message: `Great job updating your progress! Current weight: ${weight} kg.`
+        });
+
         res.json(log);
     } catch (err) {
         console.error(err.message);

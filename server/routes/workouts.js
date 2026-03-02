@@ -45,6 +45,15 @@ router.post('/', protect, async (req, res) => {
             category
         });
         const createdWorkout = await workout.save();
+
+        // Create a notification for the new workout
+        const Notification = require('../models/Notification');
+        await Notification.create({
+            user: req.user._id,
+            type: 'workout',
+            message: `Awesome! You just completed a ${duration} min ${activity} workout.`
+        });
+
         res.status(201).json(createdWorkout);
     } catch (error) {
         res.status(500).json({ message: error.message });
